@@ -5,72 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>System Status</title>
   <style>
-    body{margin:0;color:#222;font:13px Verdana,Arial,sans-serif;background:#fff}
-    .titlebar{padding:8px 10px;background:#4d6297;color:#fff;font-weight:bold}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #d5d5d5}
-    th{background:#e8e8e8;color:#222}
-    .TDFirst{background:#f4f4f4}.TDSecond{background:#fff}
+    /* Embedded equivalent of the iView styles used by StatusChansList and Status. */
+    body{background:#f2f2f2;color:#333;font:13px Verdana,Arial,Helvetica,sans-serif;margin:5px;text-align:left}
+    .titlebardiv{background:#d5d5d5;border-bottom:1px solid #c8c8c8;color:#444;font-size:14px;font-weight:bold;padding:10px 8px 12px;text-align:left;white-space:nowrap}
+    #ARS1{color:#777;float:right}
+    table.layout{border:0;text-align:left;width:100%}
+    table.styled{background:#c4c4c4;border-collapse:separate;border-spacing:1px;font-size:13px;margin:5px auto 10px}
+    table.styled td{padding:7px}
+    .THheadLink{background:#fff;color:#5c5c5c;font-size:13px;font-weight:bold;text-align:left;vertical-align:middle}
+    .THheadLink td{border-bottom:3px solid #169dd8;padding:10px!important}
+    /* The XSL emits these mixed-case class names; define them explicitly as CSS is case-sensitive. */
+    .TDFirst{background:#e8e8e8;color:#000}
+    .TDSecond{background:#f8f8f8;color:#000}
     .message{margin:12px;color:#8b0000;white-space:pre-wrap}
   </style>
 </head>
 <body>
-  <main id="content" aria-live="polite"><div class="titlebar">Test System Status</div><p class="message">Loading…</p></main>
+  <main id="content" aria-live="polite">
+    <section aria-labelledby="channels-title">
+      <div class="titlebardiv" id="channels-title">Test System Channels <span id="ARS1">System not running</span></div>
+      <table class="layout styled" id="channels-table">
+        <thead><tr class="THheadLink"><td>Name</td><td>Value</td></tr></thead>
+        <tbody><tr><td colspan="2">Loading…</td></tr></tbody>
+      </table>
+    </section>
+    <section aria-labelledby="status-title">
+      <div class="titlebardiv" id="status-title">Test System Status</div>
+      <table class="layout styled" id="status-table">
+        <thead><tr class="THheadLink"><td>Name</td><td>Value</td></tr></thead>
+        <tbody><tr><td colspan="2">Loading…</td></tr></tbody>
+      </table>
+    </section>
+    <p class="message" id="error-message" hidden></p>
+  </main>
   <script>
-    // These helpers read direct child elements as the original XSL templates did.
+    // Read direct child elements, matching the XSL paths without relying on browser-specific XML APIs.
     function childText(node, name) {
       const child = Array.from(node.children).find(element => element.localName === name);
       return child ? child.textContent.trim() : '';
     }
 
-    function showError(message) {
-      const output = document.createElement('p');
-      output.className = 'message';
-      output.textContent = message;
-      document.querySelector('#content').replaceChildren(output);
+    function findReport(xml, name) {
+      return xml.documentElement.localName === name
+        ? xml.documentElement
+        : Array.from(xml.getElementsByTagName('*')).find(node => node.localName === name) || null;
+    }
+
+    function renderItems(tableId, items, valueName) {
+      const body = document.querySelector(`#${tableId} tbody`);
+      body.replaceChildren();
+      items.forEach((item, index) => {
+        const row = body.insertRow();
+        row.className = index % 2 === 0 ? 'TDSecond' : 'TDFirst';
+        row.insertCell().textContent = childText(item, 'Name');
+        row.insertCell().textContent = childText(item, valueName);
+      });
+      if (!items.length) {
+        const row = body.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 2;
+        cell.textContent = 'No data available.';
+      }
     }
 
     function renderStatus(xml) {
-      const parserError = xml.querySelector('parsererror');
-      if (parserError) throw new Error('The server returned invalid XML.');
-      const report = xml.documentElement.localName === 'Status'
-        ? xml.documentElement
-        : xml.getElementsByTagName('Status')[0];
-      if (!report) throw new Error('The response did not contain AtlasReport/Status.');
+      if (xml.querySelector('parsererror')) throw new Error('The server returned invalid XML.');
+      const channelReport = findReport(xml, 'StatusChansList');
+      const statusReport = findReport(xml, 'Status');
+      if (!channelReport && !statusReport) throw new Error('The response did not contain AtlasReport/StatusChansList or AtlasReport/Status.');
 
-      const table = document.createElement('table');
-      const head = table.createTHead().insertRow();
-      ['Name', 'Value'].forEach(label => {
-        const cell = document.createElement('th');
-        cell.textContent = label;
-        head.appendChild(cell);
-      });
-      const body = table.createTBody();
-      Array.from(report.children).filter(item => item.localName === 'Item').forEach((item, index) => {
-        const row = body.insertRow();
-        row.className = index % 2 === 0 ? 'TDSecond' : 'TDFirst';
-        [childText(item, 'Name'), childText(item, 'Value')].forEach(value => {
-          row.insertCell().textContent = value;
-        });
-      });
+      const channelItems = channelReport
+        ? Array.from(channelReport.children).filter(item => item.localName === 'Item')
+        : [];
+      const statusItems = statusReport
+        ? Array.from(statusReport.children).filter(item => item.localName === 'Item')
+        : [];
+      if (channelReport) renderItems('channels-table', channelItems, 'Value');
+      if (statusReport) renderItems('status-table', statusItems, 'Value');
 
-      const title = document.createElement('div');
-      title.className = 'titlebar';
-      title.textContent = 'Test System Status';
-      document.querySelector('#content').replaceChildren(title, table);
+      // The legacy channel-list script displayed AtlasRunState next to the channel list title.
+      const runState = statusReport && Array.from(statusReport.children).find(node => node.localName === 'AtlasRunState');
+      const runStateLabel = document.getElementById('ARS1');
+      if (runState) {
+        const text = runState.textContent.trim();
+        runStateLabel.textContent = text;
+        runStateLabel.style.color = text.toLowerCase().includes('not running') ? '#ff2222' : '#fff';
+      }
+      document.getElementById('error-message').hidden = true;
     }
 
     async function loadStatus() {
       try {
-        const response = await fetch('/Status', { headers: { Accept: 'application/xml, text/xml' }, credentials: 'same-origin' });
+        const response = await fetch('/Status', {
+          headers: { Accept: 'application/xml, text/xml' },
+          credentials: 'same-origin'
+        });
         if (!response.ok) throw new Error(`Request failed (${response.status} ${response.statusText}).`);
         const xml = new DOMParser().parseFromString(await response.text(), 'application/xml');
         renderStatus(xml);
       } catch (error) {
-        showError(`Unable to load system status: ${error.message}`);
+        const output = document.getElementById('error-message');
+        output.textContent = `Unable to load system status: ${error.message}`;
+        output.hidden = false;
       }
     }
+
     loadStatus();
+    // Keep channel values fresh, matching the original StatusChansList clock() refresh interval.
+    window.setInterval(loadStatus, 10000);
   </script>
 </body>
 </html>
