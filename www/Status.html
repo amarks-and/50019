@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System Status</title>
+  <style>
+    body{margin:0;color:#222;font:13px Verdana,Arial,sans-serif;background:#fff}
+    .titlebar{padding:8px 10px;background:#4d6297;color:#fff;font-weight:bold}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #d5d5d5}
+    th{background:#e8e8e8;color:#222}
+    .TDFirst{background:#f4f4f4}.TDSecond{background:#fff}
+    .message{margin:12px;color:#8b0000;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+  <main id="content" aria-live="polite"><div class="titlebar">Test System Status</div><p class="message">Loading…</p></main>
+  <script>
+    // These helpers read direct child elements as the original XSL templates did.
+    function childText(node, name) {
+      const child = Array.from(node.children).find(element => element.localName === name);
+      return child ? child.textContent.trim() : '';
+    }
+
+    function showError(message) {
+      const output = document.createElement('p');
+      output.className = 'message';
+      output.textContent = message;
+      document.querySelector('#content').replaceChildren(output);
+    }
+
+    function renderStatus(xml) {
+      const parserError = xml.querySelector('parsererror');
+      if (parserError) throw new Error('The server returned invalid XML.');
+      const report = xml.documentElement.localName === 'Status'
+        ? xml.documentElement
+        : xml.getElementsByTagName('Status')[0];
+      if (!report) throw new Error('The response did not contain AtlasReport/Status.');
+
+      const table = document.createElement('table');
+      const head = table.createTHead().insertRow();
+      ['Name', 'Value'].forEach(label => {
+        const cell = document.createElement('th');
+        cell.textContent = label;
+        head.appendChild(cell);
+      });
+      const body = table.createTBody();
+      Array.from(report.children).filter(item => item.localName === 'Item').forEach((item, index) => {
+        const row = body.insertRow();
+        row.className = index % 2 === 0 ? 'TDSecond' : 'TDFirst';
+        [childText(item, 'Name'), childText(item, 'Value')].forEach(value => {
+          row.insertCell().textContent = value;
+        });
+      });
+
+      const title = document.createElement('div');
+      title.className = 'titlebar';
+      title.textContent = 'Test System Status';
+      document.querySelector('#content').replaceChildren(title, table);
+    }
+
+    async function loadStatus() {
+      try {
+        const response = await fetch('/Status', { headers: { Accept: 'application/xml, text/xml' }, credentials: 'same-origin' });
+        if (!response.ok) throw new Error(`Request failed (${response.status} ${response.statusText}).`);
+        const xml = new DOMParser().parseFromString(await response.text(), 'application/xml');
+        renderStatus(xml);
+      } catch (error) {
+        showError(`Unable to load system status: ${error.message}`);
+      }
+    }
+    loadStatus();
+  </script>
+</body>
+</html>
