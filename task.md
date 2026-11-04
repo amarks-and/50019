@@ -9,7 +9,7 @@ _ **Target Files/Directories: *** `..\iViewBox\InstallFiles\iview\www`
 ## Step-by-Step Instructions
 1. **Locate the XSL File**: Navigate to the directory where `cellstatusformat.xsl` is located. This file contains the XSLT transformations that define how the XML data is presented.
 2. **Analyze the XSL Structure**: Open `cellstatusformat.xsl` in a text editor or an IDE that supports XML/XSLT. Review the templates, match patterns, and any included CSS or JavaScript references.
-3. **Extract CSS and JavaScript**: Identify any `<style>` or `<script>` tags within the XSL file. If the XSL references external HTML, CSS, or JS files, include those in the newly created HTML files. Also be sure that created HTML files use same classes for HTML elements that are in the xsl.
+3. **Extract CSS and JavaScript**: Identify any `<style>` or `<script>` tags within the XSL file. If the XSL references external HTML, CSS, or JS files, include those references in the newly created HTML files. Also be sure that created HTML files use same classes for HTML elements that are in the xsl.
 4. **Create HTML file for the `AtlasReport/StatusChansList` and `AtlasReport/Status` templates**
 	- Create a new HTML file named `Status.html` in the target www directory
 	- Copy the relevant XSLT template content for the `AtlasReport/StatusChansList` and `AtlasReport/Status` into the body of the HTML file, adding javascript code that performs the same functionality as the XSLT transformations.
@@ -39,8 +39,9 @@ _ **Target Files/Directories: *** `..\iViewBox\InstallFiles\iview\www`
 	- Ensure that all navigation links point to the correct HTML files instead of XSL templates.
 
 ## Constraints & Guardrails (Negative Prompting)
-- **DO NOT** refactor any existing .html, .css, or .js files. Only create new .html files for the templates specified in the instructions
+- **DO NOT** refactor any pre-existing .html, .css, or .js files. Only create new .html files or update the files originally created by this task.
 - **DO NOT** install any new libraries or frameworks. Use vanilla JavaScript and CSS for the embedded code.
+- **DO NOT** recreate css styles in the HTML from referenced .css files. Any external CSS references should be preserved as is.
 
 ## Expected Output Artifacts
 - **Code:** : New HTML files with embedded CSS and JavaScript for each of the specified templates, located in the www folder.
