@@ -1,0 +1,36 @@
+@charset "utf-8";
+/* CSS Document for iView Footer */
+
+body{
+	background:#D5D5D5;
+	font-family: Verdana, Arial, Helvetica, Sans-serif;
+	margin:0px;
+	overflow:hidden;
+	padding:0px;}
+
+.clear{
+	clear:both;}
+
+.copyright{
+	color:#898686;
+	float:right;
+	font-size:11px;
+	margin:9px 8px 0px 0px;
+	text-align:right;
+	width:400px;}
+
+.footer-row{
+	color:#fff;
+	font-size:12px;
+	min-width:750px;}
+
+.status-label{
+	color:#2D6A9F;
+	float:left;
+	font-weight:bold;
+	margin:9px 5px 0px 8px;}
+	
+.status{
+	color:#44474D;
+	float:left;
+	margin:9px 0px 0px 0px;}

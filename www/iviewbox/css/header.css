@@ -1,0 +1,32 @@
+@charset "utf-8";
+/* CSS Document for iView Header */
+
+body{
+	background:#E3E6EB;
+	font-family:Verdana, sans-serif;
+	margin:0;}
+
+.clear{
+	clear:both;}
+
+#header{
+	background:url(../images/header.jpg) top right no-repeat;
+	height:75px;}
+	
+#header .logo{
+	float:left;
+	margin:15px 0px 0px 15px;}
+	
+#header .name{
+	color:#2D6A9F;
+	float:left;
+	font-size:21px;
+	margin:23px 0 0 18px;}
+	
+.line-blue{
+	background:#2D6A9F;
+	height:7px;}
+
+.line-gray{
+	background:#D5D5D5;
+	height:1px;}

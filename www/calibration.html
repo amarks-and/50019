@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" dir="ltr"> 
+  <!-- This file is part of the  Civetweb project,
+    http://code.google.com/p/civetweb -->
+	<head>
+		<title>Calibration</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		<script src="scripts/jquery-1.9.1.js"></script>
+		<script src="scripts/jquery-ui-1.10.2.custom.min.js"></script>
+        <script src="scripts/jquery.xml2json.js"></script>
+		<script src="calibration.js"></script>
+		<link rel="stylesheet" href="css/smoothness/jquery-ui-1.10.2.custom.min.css" type="text/css"></link>
+		<link rel="stylesheet" type="text/css" href="/iviewbox/atlas-iview.css"></link>
+
+		<style>
+		    #tbl, #tbl2
+		    {
+		        margin-left: 5px;
+		        margin-right: 5px;
+		    }
+		    #edit table
+		    {
+		        margin-left: auto;
+		        margin-right: auto;
+		    }
+		    #btnSave
+		    {
+		        margin-top: 5px;
+		    }
+			#cal input
+			{
+				width: 100px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="titlebardiv">Calibration</div>
+        <input id="btnSave" type="button" class="ad-button-save" value="Save" disabled />
+		<div><h2>Analog Input</h2></div>
+		<table id="tbl2" class="styled">
+			<tr class="THheadLink"><td>Channel Name</td><td>Offset</td><td>Scale</td><td>New Offset</td><td>New Scale</td></tr>
+		</table>
+		<div><h2>Analog Output</h2></div>
+		<table id="tbl" class="styled">
+			<tr class="THheadLink"><td>Channel Name</td><td>Low Rail</td><td>High Rail</td><td>Low EU</td><td>High EU</td></tr>
+		</table>
+        <div id="edit" style="display: none">
+            <table>
+                <tr><td>Low Rail</td><td><input id="txtLR" /></td></tr>
+                <tr><td>High Rail</td><td><input id="txtHR" /></td></tr>
+                <tr><td>Low EU</td><td><input id="txtLEU" /></td></tr>
+                <tr><td>High EU</td><td><input id="txtHEU" /></td></tr>
+            </table>
+        </div>
+		<div id="cal" style="display: none;">
+			<table>
+				<tr><th></th><th>Raw</th><th>EU</th><th>New EU</th></tr>
+				<tr><td>Live</td><td><input id="txtRaw" readonly /></td><td><input id="txtEU" readonly /></td><td><input id="txtNewEU" readonly /></td></tr>
+				<tr><td>Point 1</td><td><input id="txtRaw1"/></td><td><input id="txtEU1"/></td><td><button id="btnRecord1" title="Use current Raw for this point">Record</button></td></tr>
+				<tr><td>Point 2</td><td><input id="txtRaw2"/></td><td><input id="txtEU2"/></td><td><button id="btnRecord2" title="Use current Raw for this point">Record</button></td></tr>
+				<tr><th></th><th>Offset</th><th>Scale</th></tr>
+				<tr><td>Current</td><td><input id="txtC0" readonly /></td><td><input id="txtC1" readonly /></td></tr>
+				<tr><td>New</td><td><input id="txtNewC0" readonly /></td><td><input id="txtNewC1" readonly /></td></tr>
+			</table>
+		</div>
+		<div style="visibility: hidden;">
+            <div id="txtOK">OK</div>
+            <div id="txtCancel">Cancel</div>
+            <div id="txtErrNan">All calibration fields must be numbers.</div>
+            <div id="txtErrHRLTLR">High Rail must be greater than Low Rail.</div>
+            <div id="txtErrHEULTLEU">High EU must be greater than Low EU.</div>
+            <div id="txtEditTitle">Edit Calibration for {0}</div>
+            <div id="txtSaveSuccess">The calibration settings were saved.</div>
+            <div id="txtSaveFail">An error occurred while saving the calibration settings.</div>
+		</div>
+	</body>
+	
+    <script type="text/javascript">
+    	$(document).ready(on_document_ready);
+	</script>
+</html>

@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" dir="ltr"> 
+  <!-- This file is part of the  Civetweb project,
+    http://code.google.com/p/civetweb -->
+	<head>
+		<title>Change Settings</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		<script src="scripts/jquery-1.9.1.js"></script>
+		<script src="scripts/jquery-ui-1.10.2.custom.min.js"></script>
+		<script src="change_settings.js"></script>
+		<link rel="stylesheet" href="css/smoothness/jquery-ui-1.10.2.custom.min.css" type="text/css"></link>
+		<link rel="stylesheet" type="text/css" href="/iviewbox/atlas-iview.css"></link>
+
+		<style>
+		</style>
+	</head>
+	<body>
+		<div class="titlebardiv">Change Settings</div>
+        <h3>Date/Time</h3>
+        <table>
+		    <tr><td>Local Time:</td><td id="localTime"></td></tr>
+		    <tr><td>iViewBox Time (UTC):</td><td id="remoteTime"></td></tr>
+        </table>
+
+        <h3>Network Configuration</h3>
+        <table>
+		    <tr><td>IP Address:</td><td><input id="ipAddress" /></td></tr>
+		    <tr><td>Net Mask:</td><td><input id="netMask" /></td></tr>
+			<tr><td>Gateway IP Address:</td><td><input id="ipGateway" /></td></tr>
+        </table>
+        <input type="button" id="setAddress" value="Update Network configuration" />
+
+		<h3>LabCentral Settings</h3>
+        <table>
+		    <tr><td>IP Address:</td><td><input id="labCentralIpAddress" /></td></tr>
+        </table>
+        <input type="button" id="setLabCentral" value="Update LabCentral Settings" />
+
+        <div id="dialog" title="Change Settings" style="display: hidden;">
+            <span id="dialogText"></span>
+        </div>
+
+		<div style="visibility: hidden;">
+            <div id="txtSetTimeSucceeded">The time has been changed.</div>
+            <div id="txtSetTimeFailed">An error occurred changing the time.</div>
+            <div id="txtOK">OK</div>
+            <div id="txtINVALID_ADDRESS">The specified address is not a valid IP address.</div>
+            <div id="txtINVALID_NETMASK">The specified net mask is not a valid network mask.</div>
+			<div id="txtINVALID_GATEWAY">The specified gateway is not a valid IP address.</div>
+            <div id="txtSetAddressSucceeded">The IP address has been changed. Restart the iViewBox for the new address to take effect.</div>
+            <div id="txtUnknownError">An unknown error occurred.</div>
+			<div id="txtSetLabCentralAddressSucceeded">Successfully set LabCentral IP Address</div>
+			<div id="txtCLOUDIFY_ERROR">There was an error configuring the Cloudify setting</div>
+		</div>
+		
+	</body>
+	
+    <script type="text/javascript">
+    	$(document).ready(on_document_ready);
+	</script>
+</html>

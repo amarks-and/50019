@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" dir="ltr"> 
+  <!-- This file is part of the  Civetweb project,
+    http://code.google.com/p/civetweb -->
+	<head>
+		<title>Upload iView Level2 Configuration</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		<script src="scripts/jquery-1.9.1.js"></script>
+		<script src="scripts/jquery-ui-1.10.2.custom.min.js"></script>
+		<script src="update_level2.js"></script>
+		<link rel="stylesheet" href="css/smoothness/jquery-ui-1.10.2.custom.min.css" type="text/css"></link>
+		<link rel="stylesheet" type="text/css" href="/iviewbox/atlas-iview.css"></link>
+
+		<style>
+		#prgDialog div {
+			text-align: center;
+			margin-top: 16px;
+		}
+		div {
+			margin-top: 4px;
+			margin-bottom: 4px;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="titlebardiv">Upload iView Level2 Configuration</div>
+        <form method="POST" action="upload_level2_config" enctype="multipart/form-data" name="frmUpload" id="frmUpload" target="hidden_upload">
+		<table>
+		<br />
+		<div>
+			Upload iViewLevel2Config.csv File:&nbsp;<input type="file" name="level2" id="level2">
+		</div>
+		<br />
+		<hr />
+		<div>
+			<input type="submit" id="upload" value="Upload" disabled />
+		</div>
+		<iframe id="hidden_upload" name="hidden_upload" src="" style='width:0;height:0;border:0px solid #fff'></iframe>
+		</form>
+		<div id="prgDialog" title="Uploading Configuration" style="display: none;">
+		<div id="prgText"></div>
+		<div><img id="waiting" src="images/waitingpopup.gif" /></div>
+		</div>
+		<div style="visibility: hidden;">
+			<div id="txtUploading">Uploading iView Level2 configuration...</div>
+			<div id="txtComplete">Upload complete. It may take several seconds for the new configuration to become active.</div>
+		</div>
+	</body>
+	
+    <script type="text/javascript">
+    	$(document).ready(on_document_ready);
+	</script>
+</html>
