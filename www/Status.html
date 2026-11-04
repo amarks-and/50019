@@ -4,32 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>System Status</title>
+  <link rel="stylesheet" type="text/css" href="/iviewbox/atlas-iview.css"></link>
   <style>
-    /* Embedded equivalent of the iView styles used by StatusChansList and Status. */
-    body{background:#f2f2f2;color:#333;font:13px Verdana,Arial,Helvetica,sans-serif;margin:5px;text-align:left}
-    .titlebardiv{background:#d5d5d5;border-bottom:1px solid #c8c8c8;color:#444;font-size:14px;font-weight:bold;padding:10px 8px 12px;text-align:left;white-space:nowrap}
-    #ARS1{color:#777;float:right}
-    table.layout{border:0;text-align:left;width:100%}
-    table.styled{background:#c4c4c4;border-collapse:separate;border-spacing:1px;font-size:13px;margin:5px auto 10px}
-    table.styled td{padding:7px}
-    .THheadLink{background:#fff;color:#5c5c5c;font-size:13px;font-weight:bold;text-align:left;vertical-align:middle}
-    .THheadLink td{border-bottom:3px solid #169dd8;padding:10px!important}
-    /* The XSL emits these mixed-case class names; define them explicitly as CSS is case-sensitive. */
-    .TDFirst{background:#e8e8e8;color:#000}
-    .TDSecond{background:#f8f8f8;color:#000}
+    body{margin:0}
     .message{margin:12px;color:#8b0000;white-space:pre-wrap}
+    .status-section{margin-top:10px}
   </style>
 </head>
 <body>
   <main id="content" aria-live="polite">
-    <section aria-labelledby="channels-title">
+    <section class="status-section" aria-labelledby="channels-title">
       <div class="titlebardiv" id="channels-title">Test System Channels <span id="ARS1">System not running</span></div>
       <table class="layout styled" id="channels-table">
         <thead><tr class="THheadLink"><td>Name</td><td>Value</td></tr></thead>
         <tbody><tr><td colspan="2">Loading…</td></tr></tbody>
       </table>
     </section>
-    <section aria-labelledby="status-title">
+    <section class="status-section" aria-labelledby="status-title">
       <div class="titlebardiv" id="status-title">Test System Status</div>
       <table class="layout styled" id="status-table">
         <thead><tr class="THheadLink"><td>Name</td><td>Value</td></tr></thead>
@@ -39,7 +30,6 @@
     <p class="message" id="error-message" hidden></p>
   </main>
   <script>
-    // Read direct child elements, matching the XSL paths without relying on browser-specific XML APIs.
     function childText(node, name) {
       const child = Array.from(node.children).find(element => element.localName === name);
       return child ? child.textContent.trim() : '';
@@ -51,14 +41,14 @@
         : Array.from(xml.getElementsByTagName('*')).find(node => node.localName === name) || null;
     }
 
-    function renderItems(tableId, items, valueName) {
+    function renderItems(tableId, items) {
       const body = document.querySelector(`#${tableId} tbody`);
       body.replaceChildren();
       items.forEach((item, index) => {
         const row = body.insertRow();
         row.className = index % 2 === 0 ? 'TDSecond' : 'TDFirst';
         row.insertCell().textContent = childText(item, 'Name');
-        row.insertCell().textContent = childText(item, valueName);
+        row.insertCell().textContent = childText(item, 'Value');
       });
       if (!items.length) {
         const row = body.insertRow();
@@ -74,16 +64,12 @@
       const statusReport = findReport(xml, 'Status');
       if (!channelReport && !statusReport) throw new Error('The response did not contain AtlasReport/StatusChansList or AtlasReport/Status.');
 
-      const channelItems = channelReport
-        ? Array.from(channelReport.children).filter(item => item.localName === 'Item')
-        : [];
-      const statusItems = statusReport
-        ? Array.from(statusReport.children).filter(item => item.localName === 'Item')
-        : [];
-      if (channelReport) renderItems('channels-table', channelItems, 'Value');
-      if (statusReport) renderItems('status-table', statusItems, 'Value');
+      const channelItems = channelReport ? Array.from(channelReport.children).filter(item => item.localName === 'Item') : [];
+      const statusItems = statusReport ? Array.from(statusReport.children).filter(item => item.localName === 'Item') : [];
 
-      // The legacy channel-list script displayed AtlasRunState next to the channel list title.
+      if (channelReport) renderItems('channels-table', channelItems);
+      if (statusReport) renderItems('status-table', statusItems);
+
       const runState = statusReport && Array.from(statusReport.children).find(node => node.localName === 'AtlasRunState');
       const runStateLabel = document.getElementById('ARS1');
       if (runState) {
@@ -111,7 +97,6 @@
     }
 
     loadStatus();
-    // Keep channel values fresh, matching the original StatusChansList clock() refresh interval.
     window.setInterval(loadStatus, 10000);
   </script>
 </body>

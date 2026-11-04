@@ -4,23 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Files</title>
+  <link rel="stylesheet" type="text/css" href="/iviewbox/atlas-iview.css"></link>
   <style>
-    body{margin:0;color:#222;font:13px Verdana,Arial,sans-serif;background:#fff}
-    .titlebar{padding:8px 10px;background:#4d6297;color:#fff;font-weight:bold}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{padding:5px 8px;border-bottom:1px solid #d5d5d5}
-    th{background:#e8e8e8;text-align:left}
-    th.size,td.size{text-align:right}
-    .TDFirst{background:#f4f4f4}.TDSecond{background:#fff}
-    a{color:#245b8f;text-decoration:none}a:hover{text-decoration:underline}
+    body{margin:0}
+    .titlebardiv{padding:10px 8px 12px}
     .entry img{width:16px;height:16px;vertical-align:middle;margin-right:5px}
+    .size{text-align:right}
     .message{margin:12px;color:#8b0000;white-space:pre-wrap}
   </style>
 </head>
 <body>
   <main id="content" aria-live="polite"><p class="message">Loading…</p></main>
   <script>
-    // Format like XSLT format-number(..., '###,###,###'), defaulting missing or zero values to 0.
     function formatNumber(value) {
       const number = Number(String(value || '').replace(/,/g, '').trim());
       if (!Number.isFinite(number) || number === 0) return '0';
@@ -39,16 +34,6 @@
       document.querySelector('#content').replaceChildren(output);
     }
 
-    function safeEntryHref(relPath) {
-      // Resolve server-provided relative links, but never allow script or other non-web schemes.
-      try {
-        const url = new URL(relPath || '.', window.location.href);
-        return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
-      } catch (_) {
-        return null;
-      }
-    }
-
     function renderListing(xml) {
       if (xml.querySelector('parsererror')) throw new Error('The server returned invalid XML.');
       const listing = ['DirListing', 'NewDirListing'].includes(xml.documentElement.localName)
@@ -57,39 +42,40 @@
       if (!listing) throw new Error('The response did not contain a directory listing.');
 
       const title = document.createElement('div');
-      title.className = 'titlebar';
+      title.className = 'titlebardiv';
       title.textContent = childText(listing, 'Description') || 'Files';
+
       const table = document.createElement('table');
+      table.className = 'layout styled';
       const head = table.createTHead().insertRow();
-      [['Name', 'name'], ['Size(Bytes)', 'size'], ['Date', 'date']].forEach(([label, kind]) => {
+      ['Name', 'Size(Bytes)', 'Date'].forEach((label, index) => {
         const cell = document.createElement('th');
         cell.textContent = label;
-        if (kind !== 'name') cell.className = kind;
+        if (index > 0) cell.className = 'size';
         head.appendChild(cell);
       });
 
-      // Match the XSLT's alphabetical sort by element type (Dir/File).
       const entries = Array.from(listing.children)
         .filter(node => node.localName === 'File' || node.localName === 'Dir')
         .sort((a, b) => a.localName.localeCompare(b.localName));
+
       const body = table.createTBody();
       entries.forEach((entry, index) => {
         const row = body.insertRow();
         row.className = index % 2 === 0 ? 'TDSecond' : 'TDFirst';
+
         const nameCell = row.insertCell();
         nameCell.className = 'entry';
         const icon = document.createElement('img');
-        icon.src = entry.localName === 'Dir'
-          ? '/iviewbox/images/folder_closed.gif'
-          : '/iviewbox/images/file.gif';
+        icon.src = entry.localName === 'Dir' ? '/iviewbox/images/folder_closed.gif' : '/iviewbox/images/file.gif';
         icon.alt = '';
         nameCell.appendChild(icon);
 
         const name = childText(entry, 'Name');
-        const href = safeEntryHref(childText(entry, 'RelPath'));
-        if (href) {
+        const relPath = childText(entry, 'RelPath');
+        if (relPath) {
           const link = document.createElement('a');
-          link.href = href;
+          link.href = `files.html?path=${encodeURIComponent(relPath)}`;
           link.textContent = name;
           nameCell.appendChild(link);
         } else {
@@ -101,6 +87,7 @@
         size.textContent = formatNumber(childText(entry, 'Size'));
         row.insertCell().textContent = childText(entry, 'Date');
       });
+
       document.querySelector('#content').replaceChildren(title, table);
     }
 
@@ -111,8 +98,7 @@
         return;
       }
       try {
-        // Request the selected server directory asynchronously; encode its path as one parameter.
-        const response = await fetch(`${requestedPath}`, { headers: { Accept: 'application/xml, text/xml' }, credentials: 'same-origin' });
+        const response = await fetch(requestedPath, { headers: { Accept: 'application/xml, text/xml' }, credentials: 'same-origin' });
         if (!response.ok) throw new Error(`Request failed (${response.status} ${response.statusText}).`);
         const xml = new DOMParser().parseFromString(await response.text(), 'application/xml');
         renderListing(xml);
@@ -120,6 +106,7 @@
         showError(`Unable to load files: ${error.message}`);
       }
     }
+
     loadListing();
   </script>
 </body>

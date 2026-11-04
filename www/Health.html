@@ -4,72 +4,64 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>System Health</title>
+  <link rel="stylesheet" type="text/css" href="/iviewbox/atlas-iview.css"></link>
   <style>
-    body{margin:0;color:#222;font:13px Verdana,Arial,sans-serif;background:#fff}
-    .titlebar{padding:8px 10px;background:#4d6297;color:#fff;font-weight:bold}
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{padding:5px 8px;text-align:left;border-bottom:1px solid #d5d5d5}
-    th{background:#e8e8e8;color:#222}
-    .TDFirst{background:#f4f4f4}.TDSecond{background:#fff}
+    body{margin:0}
     .message{margin:12px;color:#8b0000;white-space:pre-wrap}
+    .health-section{margin-top:10px}
   </style>
 </head>
 <body>
-  <main id="content" aria-live="polite"><div class="titlebar">Test System Health</div><p class="message">Loading…</p></main>
+  <main id="content" aria-live="polite">
+    <div class="titlebardiv">Test System Health <span id="ARS1"> </span></div>
+    <table class="layout styled" id="health-table">
+      <thead><tr class="THheadLink"><td>Name</td><td>Value</td></tr></thead>
+      <tbody><tr><td colspan="2">Loading…</td></tr></tbody>
+    </table>
+    <p class="message" id="error-message" hidden></p>
+  </main>
   <script>
-    // Health items are direct children of AtlasReport/Health/Items/Item.
     function childText(node, name) {
       const child = Array.from(node.children).find(element => element.localName === name);
       return child ? child.textContent.trim() : '';
     }
 
-    function showError(message) {
-      const output = document.createElement('p');
-      output.className = 'message';
-      output.textContent = message;
-      document.querySelector('#content').replaceChildren(output);
-    }
-
     function renderHealth(xml) {
       if (xml.querySelector('parsererror')) throw new Error('The server returned invalid XML.');
-      let items = null;
-      if (xml.documentElement.localName === 'Items') items = xml.documentElement;
-      else items = xml.getElementsByTagName('Items')[0];
+      const items = xml.documentElement.localName === 'Items'
+        ? xml.documentElement
+        : xml.getElementsByTagName('Items')[0];
       if (!items) throw new Error('The response did not contain AtlasReport/Health/Items.');
 
-      const table = document.createElement('table');
-      const head = table.createTHead().insertRow();
-      ['Name', 'Value'].forEach(label => {
-        const cell = document.createElement('th');
-        cell.textContent = label;
-        head.appendChild(cell);
-      });
-      const body = table.createTBody();
+      const body = document.querySelector('#health-table tbody');
+      body.replaceChildren();
       Array.from(items.children).filter(item => item.localName === 'Item').forEach((item, index) => {
         const row = body.insertRow();
         row.className = index % 2 === 0 ? 'TDSecond' : 'TDFirst';
-        [childText(item, 'Name'), childText(item, 'Value')].forEach(value => {
-          row.insertCell().textContent = value;
-        });
+        row.insertCell().textContent = childText(item, 'Name');
+        row.insertCell().textContent = childText(item, 'Value');
       });
-
-      const title = document.createElement('div');
-      title.className = 'titlebar';
-      title.textContent = 'Test System Health';
-      document.querySelector('#content').replaceChildren(title, table);
+      document.getElementById('error-message').hidden = true;
     }
 
     async function loadHealth() {
       try {
-        const response = await fetch('/Health', { headers: { Accept: 'application/xml, text/xml' }, credentials: 'same-origin' });
+        const response = await fetch('/Health', {
+          headers: { Accept: 'application/xml, text/xml' },
+          credentials: 'same-origin'
+        });
         if (!response.ok) throw new Error(`Request failed (${response.status} ${response.statusText}).`);
         const xml = new DOMParser().parseFromString(await response.text(), 'application/xml');
         renderHealth(xml);
       } catch (error) {
-        showError(`Unable to load system health: ${error.message}`);
+        const output = document.getElementById('error-message');
+        output.textContent = `Unable to load system health: ${error.message}`;
+        output.hidden = false;
       }
     }
+
     loadHealth();
+    window.setInterval(loadHealth, 10000);
   </script>
 </body>
 </html>
