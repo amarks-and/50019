@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iViewBox</title>
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden}body{display:grid;grid-template-rows:83px minmax(0,1fr) 32px}
+    .main{display:grid;grid-template-columns:205px minmax(0,1fr);min-height:0}iframe{border:0;width:100%;height:100%}
+  </style>
+</head>
+<body>
+  <iframe title="iViewBox header" src="iviewbox/header.html" scrolling="no"></iframe>
+  <div class="main">
+    <iframe title="Navigation" name="left" src="NavTree.html"></iframe>
+    <iframe title="System status" name="right" src="Status.html"></iframe>
+  </div>
+  <iframe title="iViewBox footer" src="iviewbox/bottom.html" scrolling="no"></iframe>
+</body>
+</html>
